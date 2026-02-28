@@ -9,6 +9,7 @@ local branchLength = tonumber(args[2]) or 20
 local spacing      = tonumber(args[3]) or 3
 local dumpEvery    = tonumber(args[4]) or 6    -- branch-pairs between dumps; 0 disables periodic dumps
 local torchEvery   = tonumber(args[5]) or 8    -- blocks between torches in the *main corridor*; 0 disables torches
+local branchTorchEvery = tonumber(args[6]) or 10  -- 0 disables branch torches
 
 local TORCH_SLOT = 16
 local MAX_TRIES  = 60       -- how long we try before giving up on a move (ticks)
@@ -136,16 +137,13 @@ end
 
 -- Place a torch behind the turtle on the floor (common corridor lighting).
 local function placeTorchBehind()
-  if torchEvery <= 0 then return end
-  if turtle.getItemCount(TORCH_SLOT) <= 0 then return end
-
-  -- place on the block behind turtle on the ground:
-  -- turn around, try placeDown, turn back
+  if turtle.getItemCount(TORCH_SLOT) <= 0 then return false end
   turtle.select(TORCH_SLOT)
   turnAround()
-  turtle.placeDown()
+  local ok = turtle.placeDown()
   turnAround()
   selectSafeSlot(1)
+  return ok
 end
 
 -- ---------------- Navigation / dump ----------------
@@ -193,7 +191,9 @@ local function mineBranch(side, length)
       break
     end
     progressed = progressed + 1
-
+    if branchTorchEvery > 0 and (progressed % branchTorchEvery == 0) then
+      placeTorchBehind()
+    end
     if invAlmostFull() then
       -- back to branch start
       turnAround()

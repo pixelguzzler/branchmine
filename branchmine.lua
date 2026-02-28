@@ -86,12 +86,10 @@ local function placeTorch()
 
   turtle.select(TORCH_SLOT)
 
-  -- Try left wall first, then right wall. No ceiling/floor placement.
-  turtle.turnLeft()
-  local ok = turtle.place() -- clicks the left wall block; torch appears attached
-  turtle.turnRight(); turtle.turnRight()
-  if not ok then turtle.place() end -- try right wall
-  turtle.turnLeft() -- back to original facing
+  -- Place torch in the block BEHIND the turtle (air), so it won't get dug next step.
+  turtle.turnLeft(); turtle.turnLeft()
+  turtle.place()
+  turtle.turnLeft(); turtle.turnLeft()
 
   turtle.select(1)
 end
